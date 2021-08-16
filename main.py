@@ -72,39 +72,54 @@ def save_data(title, post_url, up_vote_ratio):
 
 
 def posts_info_from_subreddit(subreddit):
+    print("happen")
     headers = {
         "User-Agent": USER_AGENT.random,
     }
-    subreddit_url = f"https://www.reddit.com/r/{subreddit}/"
-
+    print("happen")
+    subreddit_url = f"https://www.reddit.com/r/{subreddit}.json"
+    print("happen")
     try:
+        print("happen")
         request = requests.get(subreddit_url, headers=headers)
+        print("happen")
     except Exception as e:
         return f"THERE WAS AS ERROR: {e}"
-
+    print("happeneded")
     if request.status_code == 200:
         data = request.json()
 
+    print("happeneded")
     posts = data["data"]["children"]
+    print("happen")
     for post in posts:
-        try:
-            post_data = post["data"]
-            post_url = post_data["url"]
-            title = post_data["title"]
-            up_vote_ratio = post_data["upvote_ratio"]
-            thumbnail_url = post_data["thumbnail"]
-            video_url = post_data["media"]["reddit_video"]["fallback_url"]
-            audio_url = video_url.split(
-                "/DASH_")[0] + "/DASH_audio.mp4?source=fallback"
-
-            os.mkdir(title)
-            download_video(video_url, title)
-            download_audio(audio_url, title)
-            download_thumbnail(thumbnail_url, title)
-            save_data(title, post_url, up_vote_ratio)
-        except Exception as e:
-            print(e)
-            continue
+        print("happen")
+        post_data = post["data"]
+        is_video = post_data["is_video"]
+        if is_video is True:
+            print("happen")
+            try:
+                post_url = post_data["url"]
+                title = post_data["title"]
+                up_vote_ratio = post_data["upvote_ratio"]
+                thumbnail_url = post_data["thumbnail"]
+                video_url = post_data["media"]["reddit_video"]["fallback_url"]
+                audio_url = video_url.split(
+                    "/DASH_")[0] + "/DASH_audio.mp4?source=fallback"
+                print("happen")
+                print("title")
+                os.mkdir(title)
+                download_video(video_url, title)
+                print("happen")
+                download_audio(audio_url, title)
+                print("happen")
+                download_thumbnail(thumbnail_url, title)
+                save_data(title, post_url, up_vote_ratio)
+            except Exception as e:
+                print(e)
+                continue
+        elif is_video == "False":
+            print("NOT A VIDEO")
 
 
 def main():
