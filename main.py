@@ -59,7 +59,8 @@ def download_audio(audio_url, title):
 
 def save_data(title, post_url, up_vote_ratio):
     folder_name = title
-    file_name = title + "_data" + ".txt"
+    up_vote_ratio = str(up_vote_ratio)
+    file_name = title + f" [{up_vote_ratio}] " + "_data" + ".txt"
     file_path = f"{folder_name}\\{file_name}"
 
     data = f'''
@@ -71,18 +72,22 @@ def save_data(title, post_url, up_vote_ratio):
         f.write(data)
 
 
+def join_video_audio(title):
+    pass
+
+
 def posts_info_from_subreddit(subreddit):
-    print("happen")
+
     headers = {
         "User-Agent": USER_AGENT.random,
     }
-    print("happen")
+
     subreddit_url = f"https://www.reddit.com/r/{subreddit}.json"
-    print("happen")
+
     try:
-        print("happen")
+
         request = requests.get(subreddit_url, headers=headers)
-        print("happen")
+
     except Exception as e:
         return f"THERE WAS AS ERROR: {e}"
     print("happeneded")
@@ -91,13 +96,13 @@ def posts_info_from_subreddit(subreddit):
 
     print("happeneded")
     posts = data["data"]["children"]
-    print("happen")
+
     for post in posts:
-        print("happen")
+
         post_data = post["data"]
         is_video = post_data["is_video"]
         if is_video is True:
-            print("happen")
+
             try:
                 post_url = post_data["url"]
                 title = post_data["title"]
@@ -106,15 +111,20 @@ def posts_info_from_subreddit(subreddit):
                 video_url = post_data["media"]["reddit_video"]["fallback_url"]
                 audio_url = video_url.split(
                     "/DASH_")[0] + "/DASH_audio.mp4?source=fallback"
-                print("happen")
+
+                title = title.replace("\\", "").replace("/", "")
+                up_vote_ratio = int(float(up_vote_ratio) * 100)
+
                 print("title")
                 os.mkdir(title)
-                download_video(video_url, title)
-                print("happen")
-                download_audio(audio_url, title)
-                print("happen")
-                download_thumbnail(thumbnail_url, title)
-                save_data(title, post_url, up_vote_ratio)
+
+                if up_vote_ratio > 95:
+                    save_data(title, post_url, up_vote_ratio)
+                    download_video(video_url, title)
+                    download_audio(audio_url, title)
+                    download_thumbnail(thumbnail_url, title)
+                    join_video_audio(title)
+
             except Exception as e:
                 print(e)
                 continue
