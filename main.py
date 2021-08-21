@@ -1,6 +1,7 @@
 import requests
 from fake_useragent import UserAgent
 import os
+import traceback
 
 
 USER_AGENT = UserAgent()
@@ -10,6 +11,8 @@ SUBREDDITS = ["Unexpected", "holdmybeer", "ContagiousLaughter",
 
 
 def download_video(video_url, title):
+
+    print("DOWNLOADING VIDEO")
     headers = {
         "User-Agent": USER_AGENT.random,
     }
@@ -72,8 +75,9 @@ def save_data(title, post_url, up_vote_ratio):
         f.write(data)
 
 
-def join_video_audio(title):
-    pass
+def join_video_audio(title, video_file, audio_file):
+    command = f'''ffmpeg -i "{video_file}" -i "{audio_file}" -c:v copy -c:a aac "{title}\\{title}_final.mp4"'''
+    os.system(command)
 
 
 def posts_info_from_subreddit(subreddit):
@@ -89,12 +93,11 @@ def posts_info_from_subreddit(subreddit):
         request = requests.get(subreddit_url, headers=headers)
 
     except Exception as e:
+        print(traceback.format_exc())
         return f"THERE WAS AS ERROR: {e}"
-    print("happeneded")
     if request.status_code == 200:
         data = request.json()
 
-    print("happeneded")
     posts = data["data"]["children"]
 
     for post in posts:
@@ -112,24 +115,30 @@ def posts_info_from_subreddit(subreddit):
                 audio_url = video_url.split(
                     "/DASH_")[0] + "/DASH_audio.mp4?source=fallback"
 
-                title = title.replace("\\", "").replace("/", "")
+                chars_to_remove = [':', '*', '?', '"',
+                                   '/', '\\', '<', '>', '|', "."]
+                for char_to_remove in chars_to_remove:
+                    title = title.replace(f"{char_to_remove}", "")
+
+                title = title.encode('ascii', 'ignore').decode(
+                    "ascii", "ignore")
+
                 up_vote_ratio = int(float(up_vote_ratio) * 100)
 
-                print("title")
-                os.mkdir(title)
-
                 if up_vote_ratio > 95:
+                    print(f"\n\n\n{title}")
+                    os.mkdir(title)
                     save_data(title, post_url, up_vote_ratio)
-                    download_video(video_url, title)
-                    download_audio(audio_url, title)
+                    video_file = download_video(video_url, title)
+                    audio_file = download_audio(audio_url, title)
                     download_thumbnail(thumbnail_url, title)
-                    join_video_audio(title)
+                    join_video_audio(title, video_file, audio_file)
 
             except Exception as e:
-                print(e)
+                print(traceback.format_exc())
                 continue
         elif is_video == "False":
-            print("NOT A VIDEO")
+            print("THIS POST IS NOT A VIDEO")
 
 
 def main():
