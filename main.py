@@ -18,7 +18,7 @@ def download_video(video_url, title):
     }
     folder_name = title
     file_name = title + ".mp4"
-    file_path = f"{folder_name}\\{file_name}"
+    file_path = f"{folder_name}/{file_name}"
 
     with requests.get(video_url, stream=True, headers=headers) as r:
         r.raise_for_status()
@@ -34,7 +34,7 @@ def download_thumbnail(thumbnail_url, title):
     }
     folder_name = title
     file_name = title + "_thumb" + ".jpg"
-    file_path = f"{folder_name}\\{file_name}"
+    file_path = f"{folder_name}/{file_name}"
 
     with requests.get(thumbnail_url, stream=True, headers=headers) as r:
         r.raise_for_status()
@@ -50,7 +50,7 @@ def download_audio(audio_url, title):
     }
     folder_name = title
     file_name = title + "_audio" + ".mp4"
-    file_path = f"{folder_name}\\{file_name}"
+    file_path = f"{folder_name}/{file_name}"
 
     with requests.get(audio_url, stream=True, headers=headers) as r:
         r.raise_for_status()
@@ -64,7 +64,7 @@ def save_data(title, post_url, up_vote_ratio):
     folder_name = title
     up_vote_ratio = str(up_vote_ratio)
     file_name = title + f" [{up_vote_ratio}] " + "_data" + ".txt"
-    file_path = f"{folder_name}\\{file_name}"
+    file_path = f"{folder_name}/{file_name}"
 
     data = f'''
     POST_URL = {post_url}\n
@@ -76,7 +76,7 @@ def save_data(title, post_url, up_vote_ratio):
 
 
 def join_video_audio(title, video_file, audio_file):
-    command = f'''ffmpeg -i "{video_file}" -i "{audio_file}" -c:v copy -c:a aac "{title}\\{title}_final.mp4"'''
+    command = f'''ffmpeg -i "{video_file}" -i "{audio_file}" -c:v copy -c:a aac "{title}/{title}_final.mp4"'''
     os.system(command)
 
 
